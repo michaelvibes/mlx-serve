@@ -471,3 +471,9 @@ Ported kernels + vendored code are enumerated in `NOTICE` (the ONE place); `LICE
 ### App (Swift)
 
 All app-side rules: `app/CLAUDE.md`; stories: `docs/gotchas/app.md`. Crossovers: agent budgets derive from advertised `context_length`; the app ALWAYS emits memory-critical launch flags (`ServerOptions` defaults mirror Zig defaults — change both together); the two bundle binaries move together.
+
+## Waiting on long jobs (test runner)
+
+- Never let a test-runner agent wait on a single background notification. Each wait has a limit of 15 minutes; after that, the runner reads the job's output or exit-code file and continues.
+- Write a result line to the results folder when each step ends, so a stall is visible.
+- While a runner has work queued, the coordinator runs the stall watchdog in the background: `~/.claude/scripts/runner-watchdog.sh <repo> [result dirs]`. It exits when no lock is held, no test process runs and no result file changed for 20 minutes. Then check and restart the runner.
